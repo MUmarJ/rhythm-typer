@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>RhythmTyper 2</title>
+    <script src="paper-full.js"></script>
+    <script src="howler.js"></script>
+    <script src="data.js"></script>
+    <style>
+        canvas{
+        width:100%;
+        height:100%;
+        background: black;
+        }
+
+        body, html{
+        height:100%;
+        width:100%;
+        margin:0;
+        }
+    </style>
+    <script type="text/paperscript" canvas="myCanvas">
+        var n = 3;
+        var x = 150;
+        var defaultY = view.size.height/2 - 200;
+        var y = defaultY;
+        var size = 100;
+
+        var score = 0;
+        var miss = false;
+        var won = false;
+        var running = false;
+        var collided = false;
+        var end = false;
+        var modified = false;
+        
+
+        var i = 0; //ch index
+        var q = 0; //Map index
+        var actual = 0;
+         //current game selection
+        var O = Number(prompt('Pick a track\n1)BooM!\n2)DesI\n3)Hyype\n\nHint 1: Be quick for the next one if you see "+"\nHint 2: "~" signifies change\nHint 3: Focus on the beat, not the visual.\nPress F5 for quick reset and use Fullscreen for an easier time.')-1);
+        var changeCheck = 1;
+        // var modifiers = /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
+        var modifiers = /[\s\+\-!@#$%^]/;
+        var gameMap = ["t+o+t^t^o%t^t$o$t^t^o%t^t$o","v$s^v%s^v%s^v%s^v$s^v%s+h+f","p+p+p+p$p$p$p$p$p$p%p^p^o%p^p%o%p^p^o%p^p%o",""];
+        var game = gameMap[O].replace(/[\s\+\-!@#$%^]/g,"");
+        var guide;
+        guider();
+        console.log("This is the guide string\n"+guide);
+        console.log("v  sv sv sv sv  sv s  h  f"==guide);
+        console.log(gameMap[O]);
+        console.log(game);
+        var remainingLength = game.length;
+        
+        var key = null;
+        var offset=0;
+        var offsetPos=0;
+
+        var circles = [];
+
+        var text = new PointText({
+            point: view.center,
+            justification: 'center',
+            fontSize: 30,
+            fillColor: 'white'
+        });
+
+        var destination = new Point(view.size.width/2, y*(i+1));
+        // console.log (destination);
+
+
+        function onFrame(event){
+            // console.log(i);
+            // console.log(circles[0].getIntersections(circles[0]Opp)!="");
+            // console.log(gameMap[O].slice(q));
+            if(!end){
+                if(won){
+                    // console.log("won running");
+                    circleWon.scale(1.1);
+                    if(circleWon.bounds.y<-500){
+                        circleWon.remove();
+                        won=false;
+                        running=false;
+                        score++;
+                        // console.log(remainingLength);
+                        // increment();
+                    }
+                }
+
+                if(!running && i<3 && remainingLength>0){
+                    // console.log(key!=undefined);
+                    // console.log("Generating");
+                    
+                    var point = new Point(x, y*(i+1));
+                    var newCircle = new Path.Circle(point,size);
+                    newCircle.fillColor = new Color(Math.random(),Math.random(),Math.random());
+                    var point2 = new Point(view.size.width-x, y*(i+1));
+                    var newCircleOpp = new Path.Circle (point2, size);
+
+                    // var ogColors = newCircle.style.fillColor["components"];
+                    newCircleOpp.fillColor = new Color(Math.random(),Math.random(),Math.random());
+                    newCircleOpp.blendMode="add";
+                    circles.push(newCircle, newCircleOpp);
+                    
+                    // console.log(circles.length);
+                    key =  game[actual];
+
+                    // increment();
+                    // console.log(i);
+                    running = true;
+                    miss=false;
+
+                }
+                // console.log(circles[1].bounds.x-circles[0].bounds.x);
+                if(running && !won){
+                    checkForOffset();
+                    if(offsetPos!=0){
+                        // console.log(view.size.width);
+                        var offPos1=(view.size.width/5)+offsetPos;
+                        var offPos2=(view.size.width/5)+offsetPos;
+                        // console.log(offPos1);
+                        circles[0].position.x += offPos1; 
+                        circles[1].position.x -= offPos2;
+                        offsetPos=0;
+                    }
+                    circles[0].position.x += (view.size.width)/240 
+                    circles[1].position.x -= (view.size.width)/240
+                    circles[0].position.x += offset;
+                    circles[1].position.x -= offset;
+                    
+                    // if (circles[1].bounds.x<0 || won){
+                    //     circles[0].position.x=x;
+                    //     circles[1].position.x=view.size.width-x;
+                    // }
+
+                    if (circles[0].getIntersections(circles[1])!="" && !miss && running){
+                        // console.log("inside 1");
+                        collided=true;
+                    }
+                    if(circles[0].getIntersections(circles[1])=="" && collided && running){
+                            // console.log("inside 2");
+                            // console.log(circles);
+                            circles[0].remove();
+                            circles[1].remove();
+                            circles.pop();
+                            circles.pop();
+                            // console.log("Miss");
+                            miss=true;
+                            collided = false;
+                            running = false;
+                            increment();
+                    }
+                }
+                if (key!==undefined){
+                    destination.y = y*(i+1);
+                    var vector = destination - text.position;
+                    text.position += vector / 10;
+                    text.content = circles.length!=0 ? key : "";
+                    if(gameMap[O][q+1]==="%"){
+                        text.content+=" +";
+                    }
+                    else if( gameMap[O][q+1]==="^"){
+                        text.content+=" ++"
+                    }
+                    if (game[i+1]!=game[i]){
+                        text.content+=" ~"
+                    }
+                }
+
+                if(i>2 && running == false){
+                    if (Math.floor(remainingLength>0)){
+                        reset();
+                    }
+                }
+            }   
+            if(remainingLength==0 && running == false && end!=true){
+                console.log("Ending game")
+                text.fillColor="orange";
+                end=true;
+            }
+            if(end){
+                // console.log("This is running");
+                var vector = destination - text.position;
+                text.position += vector / 30;
+                text.content = "The End";
+                if(score==game.length){
+                    text.content+="\nPERFECT";
+                    text.fillColor.hue+=1;
+                }
+                else{
+                    text.fillColor = "white";
+                    text.content +="\n Score"+score+"/"+game.length;
+                }
+                // console.log("Your score was "+score);
+                // console.log("Perfect score is "+game[0].length);
+                
+                if (vector.length < 2) {
+		            destination = Point.random() * view.size;
+                }
+            }
+        }
+            
+        function onKeyDown(event){
+            // console.log(i);
+            // console.log(key);
+            // console.log(circles.length);
+            // console.log(gameMap[O][q])
+            if(running){
+                if(circles[0].getIntersections(circles[1])!=""){
+                    // console.log(circles[0]);
+                    // console.log(circles[1]);
+                    // console.log(circles[0].getIntersections(circles[1]));
+                    if(data[event.key] && event.key == key){
+                        data[event.key].sound.play();
+
+                        circleWon = new Path.Circle(new Point(circles[0].getIntersections(circles[1])[0].point["x"], y*i), size);
+                        
+                        var winColor = new Color(circles[0].style.fillColor["components"][0]+circles[1].style.fillColor["components"][0], circles[0].style.fillColor["components"][1]+circles[1].style.fillColor["components"][1], circles[0].style.fillColor["components"][2]+circles[1].style.fillColor["components"][2]);
+                        circleWon.fillColor = winColor;
+                        circles[0].remove();
+                        circles[1].remove();
+                        circles.pop();
+                        circles.pop();
+
+                        // console.log(winColor.components); 
+                        
+                        won=true;
+                    }
+                }
+
+                else if (circles[1].bounds.x-circles[0].bounds.x < 1000){
+                    circles[0].remove();
+                    circles[1].remove();
+                    circles.pop();
+                    circles.pop();
+                    console.log("Miss");
+                    miss = true;
+                    running = false;
+                    won = false;
+                    increment();
+                }
+            }
+        }
+        function guider(){
+            guide = gameMap[O].replace(/[$+]/g,"  ");
+            guide = guide.replace(/[%]/g," ");
+            guide = guide.replace(/[\^]/g,"");
+            alert(guide);
+        }
+
+        function checkForOffset(){
+            // console.log(offset==0);
+            // console.log(modifiers.test(gameMap[O][q]));
+            // console.log(modifiers.test(gameMap[O][q]) && offset===0);
+            // console.log(gameMap[0][q]);
+            if(modifiers.test(gameMap[O][q]) && modified===false){
+                console.log("offset ON");
+                if(gameMap[O][q]==="+"){
+                    // console.log(gameMap[O][q]);
+                    offset=5;
+                }
+                else if(gameMap[O][q]==="!"){
+                    offset=10;
+                }
+                else if(gameMap[O][q]==="#"){
+                    console.log("This did run")
+                    offset=15;
+                }
+                else if(gameMap[O][q]==="$"){
+                    offsetPos=5;
+                }
+                else if(gameMap[O][q]==="%"){
+                    offsetPos=140;
+                }
+                else if(gameMap[O][q]==="^"){
+                    offsetPos=325;
+                }
+                modified=true;
+                q+=1;
+            }
+            
+        }
+
+        function increment(){
+            i++;
+            actual++;
+            q++;
+            remainingLength--;
+            offset=0;
+            offsetPos=0;
+            modified=false;
+            // console.log(q);
+            // console.log(gameMap[O][q])
+            // console.log ("Offset not ON");
+        }
+
+        function reset(){
+            i=0;
+            y=defaultY;
+        }
+
+    </script>
+</head>
+<body>
+    <canvas id="myCanvas" resize></canvas>
+</body>
+</html>
