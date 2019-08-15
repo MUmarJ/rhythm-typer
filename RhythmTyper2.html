@@ -13,6 +13,7 @@
         width:100%;
         height:100%;
         background: black;
+        display: block;
         }
 
         body, html{
@@ -27,6 +28,7 @@
         var defaultY = view.size.height/2 - 200;
         var y = defaultY;
         var size = 100;
+        var widthConstant = 1920; //Optimizing resolution
 
         var score = 0;
         var miss = false;
@@ -60,6 +62,8 @@
         var offsetPos=0;
 
         var circles = [];
+        var windowSize = window.outerHeight;
+        console.log(windowSize,view.size)
 
         var text = new PointText({
             point: view.center,
@@ -119,15 +123,16 @@
                     checkForOffset();
                     if(offsetPos!=0){
                         // console.log(view.size.width);
-                        var offPos1=(view.size.width/5)+offsetPos;
-                        var offPos2=(view.size.width/5)+offsetPos;
+                        var offPos1=(view.size.width/5)+(offsetPos);
+                        var offPos2=(view.size.width/5)+(offsetPos);
                         // console.log(offPos1);
                         circles[0].position.x += offPos1; 
                         circles[1].position.x -= offPos2;
                         offsetPos=0;
+                        // console.table(circles[0].position,circles[1].position);
                     }
-                    circles[0].position.x += (view.size.width)/240 
-                    circles[1].position.x -= (view.size.width)/240
+                    circles[0].position.x += ((view.size.width)/240)
+                    circles[1].position.x -= ((view.size.width)/240)
                     circles[0].position.x += offset;
                     circles[1].position.x -= offset;
                     
@@ -260,23 +265,23 @@
                 console.log("offset ON");
                 if(gameMap[O][q]==="+"){
                     // console.log(gameMap[O][q]);
-                    offset=5;
+                    offset=view.size.width/(widthConstant/5);
                 }
                 else if(gameMap[O][q]==="!"){
-                    offset=10;
+                    offset=view.size.width/(widthConstant/10);
                 }
                 else if(gameMap[O][q]==="#"){
                     console.log("This did run")
-                    offset=15;
+                    offset=view.size.width/(widthConstant/15);
                 }
                 else if(gameMap[O][q]==="$"){
-                    offsetPos=5;
+                    offsetPos=view.size.width/(widthConstant/5);
                 }
                 else if(gameMap[O][q]==="%"){
-                    offsetPos=140;
+                    offsetPos=view.size.width/(widthConstant/140);
                 }
                 else if(gameMap[O][q]==="^"){
-                    offsetPos=325;
+                    offsetPos=view.size.width/(widthConstant/325);
                 }
                 modified=true;
                 q+=1;
