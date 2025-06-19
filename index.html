@@ -1,315 +1,1314 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>RhythmTyper 2</title>
-    <script src="paper-full.js"></script>
+    <title>RhythmTyper - Ultimate Edition</title>
     <script src="howler.js"></script>
     <script src="data.js"></script>
     <style>
-        canvas{
-        width:100%;
-        height:100%;
-        background: black;
-        display: block;
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            overflow: hidden;
+            height: 100vh;
+            color: #00ffff;
         }
 
-        body, html{
-        height:100%;
-        width:100%;
-        margin:0;
+        #gameCanvas {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: black;
+        }
+
+        #menuContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #menuContainer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 255, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 255, 255, 0.05) 0%, transparent 50%);
+            animation: laserScan 8s infinite ease-in-out;
+        }
+
+        @keyframes laserScan {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: translateX(0%) rotate(0deg);
+            }
+
+            50% {
+                opacity: 0.8;
+                transform: translateX(10%) rotate(1deg);
+            }
+        }
+
+        .menu-title {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+            background: linear-gradient(45deg, #00ffff, #00ccff, #0099ff, #0066ff, #00ffcc);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease infinite;
+            z-index: 10;
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .menu-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+            text-shadow: 0 0 10px #00ccff;
+            color: #00ccff;
+            z-index: 10;
+            position: relative;
+        }
+
+        .menu-button {
+            background: rgba(0, 255, 255, 0.05);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            color: #00ffff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 15px 40px;
+            margin: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            text-shadow: 0 0 10px #00ffff;
+            min-width: 200px;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            box-shadow:
+                inset 0 0 20px rgba(0, 255, 255, 0.1),
+                0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .menu-button:hover {
+            background: rgba(0, 255, 255, 0.15);
+            border-color: #00ffff;
+            transform: translateY(-2px);
+            box-shadow:
+                inset 0 0 30px rgba(0, 255, 255, 0.2),
+                0 0 30px rgba(0, 255, 255, 0.4),
+                0 5px 15px rgba(0, 255, 255, 0.3);
+            text-shadow: 0 0 20px #00ffff;
+        }
+
+        .menu-button:active {
+            transform: translateY(0);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .track-button {
+            background: rgba(255, 0, 100, 0.1);
+            border: 2px solid #ff0066;
+            color: #ff0066;
+            position: relative;
+            overflow: hidden;
+            box-shadow:
+                inset 0 0 20px rgba(255, 0, 100, 0.1),
+                0 0 20px rgba(255, 0, 100, 0.2);
+        }
+
+        .track-button.track-2 {
+            background: rgba(0, 255, 100, 0.1);
+            border-color: #00ff66;
+            color: #00ff66;
+            box-shadow:
+                inset 0 0 20px rgba(0, 255, 100, 0.1),
+                0 0 20px rgba(0, 255, 100, 0.2);
+        }
+
+        .track-button.track-3 {
+            background: rgba(100, 0, 255, 0.1);
+            border-color: #6600ff;
+            color: #6600ff;
+            box-shadow:
+                inset 0 0 20px rgba(100, 0, 255, 0.1),
+                0 0 20px rgba(100, 0, 255, 0.2);
+        }
+
+        .track-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .track-button:hover::before {
+            left: 100%;
+        }
+
+        .sandbox-button {
+            background: rgba(255, 165, 0, 0.1);
+            border-color: #ffaa00;
+            color: #ffaa00;
+            box-shadow:
+                inset 0 0 20px rgba(255, 165, 0, 0.1),
+                0 0 20px rgba(255, 165, 0, 0.2);
+        }
+
+        .back-button {
+            background: rgba(128, 128, 128, 0.1);
+            border-color: #888;
+            color: #888;
+            font-size: 1rem;
+            padding: 10px 30px;
+            min-width: 120px;
+            box-shadow:
+                inset 0 0 20px rgba(128, 128, 128, 0.1),
+                0 0 20px rgba(128, 128, 128, 0.2);
+        }
+
+        .track-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+            font-weight: normal;
+            color: #888;
+            text-shadow: none;
+        }
+
+        .menu-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Game UI Styles */
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+        }
+
+        #key-preview {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            color: white;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .preview-key {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            min-width: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .preview-key.current {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: gold;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .preview-key.next {
+            background: rgba(100, 149, 237, 0.2);
+            border-color: rgba(100, 149, 237, 0.5);
+        }
+
+        .preview-key.future {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+            opacity: 0.7;
+        }
+
+        #keyboard-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .keyboard-row {
+            display: flex;
+            gap: 5px;
+            margin: 3px 0;
+            justify-content: center;
+        }
+
+        .key-button {
+            width: 35px;
+            height: 35px;
+            background: rgba(60, 60, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-family: monospace;
+        }
+
+        .key-button.current {
+            background: rgba(255, 215, 0, 0.4);
+            border-color: gold;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            color: black;
+            font-weight: bold;
+        }
+
+        .key-button.next {
+            background: rgba(100, 149, 237, 0.3);
+            border-color: rgba(100, 149, 237, 0.7);
+        }
+
+        .key-button.upcoming {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        #progress-bar {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            right: 20px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        #score-display {
+            position: absolute;
+            top: 30px;
+            right: 20px;
+            color: white;
+            font-size: 16px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        #exit-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            z-index: 200;
+            pointer-events: auto;
+        }
+
+        #exit-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .sandbox-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ffff;
+            text-align: center;
+            font-size: 24px;
+            text-shadow: 0 0 20px #00ffff;
+            z-index: 50;
+            pointer-events: none;
+            transition: all 1s ease;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            box-shadow:
+                inset 0 0 20px rgba(0, 255, 255, 0.1),
+                0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .sandbox-info.moved-top {
+            top: 80px;
+            left: 50%;
+            transform: translate(-50%, 0);
+            font-size: 16px;
+            padding: 10px 20px;
+            opacity: 0.7;
+        }
+
+        .sandbox-subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+            margin-top: 10px;
+            color: #00ccff;
+        }
+
+        .sandbox-info.moved-top .sandbox-subtitle {
+            font-size: 12px;
+            margin-top: 5px;
         }
     </style>
-    <script type="text/paperscript" canvas="myCanvas">
-        var n = 3;
-        var x = 150;
-        var defaultY = view.size.height/2 - 200;
-        var y = defaultY;
-        var size = 100;
-        var widthConstant = 1920; //Optimizing resolution
-
-        var score = 0;
-        var miss = false;
-        var won = false;
-        var running = false;
-        var collided = false;
-        var end = false;
-        var modified = false;
-        
-
-        var i = 0; //ch index
-        var q = 0; //Map index
-        var actual = 0;
-         //current game selection
-        var O = Number(prompt('Pick a track\n1)BooM!\n2)DesI\n3)Hyype\n\nHint 1: Be quick for the next one if you see "+"\nHint 2: "~" signifies change\nHint 3: Focus on the beat, not the visual.\nPress F5 for quick reset and use Fullscreen for an easier time.')-1);
-        var changeCheck = 1;
-        // var modifiers = /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
-        var modifiers = /[\s\+\-!@#$%^]/;
-        var gameMap = ["t+o+t^t^o%t^t$o$t^t^o%t^t$o","v$s^v%s^v%s^v%s^v$s^v%s+h+f","p+p+p+p$p$p$p$p$p$p%p^p^o%p^p%o%p^p^o%p^p%o",""];
-        var game = gameMap[O].replace(/[\s\+\-!@#$%^]/g,"");
-        var guide;
-        guider();
-        console.log("This is the guide string\n"+guide);
-        console.log("v  sv sv sv sv  sv s  h  f"==guide);
-        console.log(gameMap[O]);
-        console.log(game);
-        var remainingLength = game.length;
-        
-        var key = null;
-        var offset=0;
-        var offsetPos=0;
-
-        var circles = [];
-        var windowSize = window.outerHeight;
-        console.log(windowSize,view.size)
-
-        var text = new PointText({
-            point: view.center,
-            justification: 'center',
-            fontSize: 30,
-            fillColor: 'white'
-        });
-
-        var destination = new Point(view.size.width/2, y*(i+1));
-        // console.log (destination);
-
-
-        function onFrame(event){
-            // console.log(i);
-            // console.log(circles[0].getIntersections(circles[0]Opp)!="");
-            // console.log(gameMap[O].slice(q));
-            if(!end){
-                if(won){
-                    // console.log("won running");
-                    circleWon.scale(1.1);
-                    if(circleWon.bounds.y<-500){
-                        circleWon.remove();
-                        won=false;
-                        running=false;
-                        score++;
-                        // console.log(remainingLength);
-                        // increment();
-                    }
-                }
-
-                if(!running && i<3 && remainingLength>0){
-                    // console.log(key!=undefined);
-                    // console.log("Generating");
-                    
-                    var point = new Point(x, y*(i+1));
-                    var newCircle = new Path.Circle(point,size);
-                    newCircle.fillColor = new Color(Math.random(),Math.random(),Math.random());
-                    var point2 = new Point(view.size.width-x, y*(i+1));
-                    var newCircleOpp = new Path.Circle (point2, size);
-
-                    // var ogColors = newCircle.style.fillColor["components"];
-                    newCircleOpp.fillColor = new Color(Math.random(),Math.random(),Math.random());
-                    newCircleOpp.blendMode="add";
-                    circles.push(newCircle, newCircleOpp);
-                    
-                    // console.log(circles.length);
-                    key =  game[actual];
-
-                    // increment();
-                    // console.log(i);
-                    running = true;
-                    miss=false;
-
-                }
-                // console.log(circles[1].bounds.x-circles[0].bounds.x);
-                if(running && !won){
-                    checkForOffset();
-                    if(offsetPos!=0){
-                        // console.log(view.size.width);
-                        var offPos1=(view.size.width/5)+(offsetPos);
-                        var offPos2=(view.size.width/5)+(offsetPos);
-                        // console.log(offPos1);
-                        circles[0].position.x += offPos1; 
-                        circles[1].position.x -= offPos2;
-                        offsetPos=0;
-                        // console.table(circles[0].position,circles[1].position);
-                    }
-                    circles[0].position.x += ((view.size.width)/240)
-                    circles[1].position.x -= ((view.size.width)/240)
-                    circles[0].position.x += offset;
-                    circles[1].position.x -= offset;
-                    
-                    // if (circles[1].bounds.x<0 || won){
-                    //     circles[0].position.x=x;
-                    //     circles[1].position.x=view.size.width-x;
-                    // }
-
-                    if (circles[0].getIntersections(circles[1])!="" && !miss && running){
-                        // console.log("inside 1");
-                        collided=true;
-                    }
-                    if(circles[0].getIntersections(circles[1])=="" && collided && running){
-                            // console.log("inside 2");
-                            // console.log(circles);
-                            circles[0].remove();
-                            circles[1].remove();
-                            circles.pop();
-                            circles.pop();
-                            // console.log("Miss");
-                            miss=true;
-                            collided = false;
-                            running = false;
-                            increment();
-                    }
-                }
-                if (key!==undefined){
-                    destination.y = y*(i+1);
-                    var vector = destination - text.position;
-                    text.position += vector / 10;
-                    text.content = circles.length!=0 ? key : "";
-                    if(gameMap[O][q+1]==="%"){
-                        text.content+=" +";
-                    }
-                    else if( gameMap[O][q+1]==="^"){
-                        text.content+=" ++"
-                    }
-                    if (game[i+1]!=game[i]){
-                        text.content+=" ~"
-                    }
-                }
-
-                if(i>2 && running == false){
-                    if (Math.floor(remainingLength>0)){
-                        reset();
-                    }
-                }
-            }   
-            if(remainingLength==0 && running == false && end!=true){
-                console.log("Ending game")
-                text.fillColor="orange";
-                end=true;
-            }
-            if(end){
-                // console.log("This is running");
-                var vector = destination - text.position;
-                text.position += vector / 30;
-                text.content = "The End";
-                if(score==game.length){
-                    text.content+="\nPERFECT";
-                    text.fillColor.hue+=1;
-                }
-                else{
-                    text.fillColor = "white";
-                    text.content +="\n Score"+score+"/"+game.length;
-                }
-                // console.log("Your score was "+score);
-                // console.log("Perfect score is "+game[0].length);
-                
-                if (vector.length < 2) {
-		            destination = Point.random() * view.size;
-                }
-            }
-        }
-            
-        function onKeyDown(event){
-            // console.log(i);
-            // console.log(key);
-            // console.log(circles.length);
-            // console.log(gameMap[O][q])
-            if(running){
-                if(circles[0].getIntersections(circles[1])!=""){
-                    // console.log(circles[0]);
-                    // console.log(circles[1]);
-                    // console.log(circles[0].getIntersections(circles[1]));
-                    if(data[event.key] && event.key == key){
-                        data[event.key].sound.play();
-
-                        circleWon = new Path.Circle(new Point(circles[0].getIntersections(circles[1])[0].point["x"], y*i), size);
-                        
-                        var winColor = new Color(circles[0].style.fillColor["components"][0]+circles[1].style.fillColor["components"][0], circles[0].style.fillColor["components"][1]+circles[1].style.fillColor["components"][1], circles[0].style.fillColor["components"][2]+circles[1].style.fillColor["components"][2]);
-                        circleWon.fillColor = winColor;
-                        circles[0].remove();
-                        circles[1].remove();
-                        circles.pop();
-                        circles.pop();
-
-                        // console.log(winColor.components); 
-                        
-                        won=true;
-                    }
-                }
-
-                else if (circles[1].bounds.x-circles[0].bounds.x < 1000){
-                    circles[0].remove();
-                    circles[1].remove();
-                    circles.pop();
-                    circles.pop();
-                    console.log("Miss");
-                    miss = true;
-                    running = false;
-                    won = false;
-                    increment();
-                }
-            }
-        }
-        function guider(){
-            guide = gameMap[O].replace(/[$+]/g,"  ");
-            guide = guide.replace(/[%]/g," ");
-            guide = guide.replace(/[\^]/g,"");
-            alert(guide);
-        }
-
-        function checkForOffset(){
-            // console.log(offset==0);
-            // console.log(modifiers.test(gameMap[O][q]));
-            // console.log(modifiers.test(gameMap[O][q]) && offset===0);
-            // console.log(gameMap[0][q]);
-            if(modifiers.test(gameMap[O][q]) && modified===false){
-                console.log("offset ON");
-                if(gameMap[O][q]==="+"){
-                    // console.log(gameMap[O][q]);
-                    offset=view.size.width/(widthConstant/5);
-                }
-                else if(gameMap[O][q]==="!"){
-                    offset=view.size.width/(widthConstant/10);
-                }
-                else if(gameMap[O][q]==="#"){
-                    console.log("This did run")
-                    offset=view.size.width/(widthConstant/15);
-                }
-                else if(gameMap[O][q]==="$"){
-                    offsetPos=view.size.width/(widthConstant/5);
-                }
-                else if(gameMap[O][q]==="%"){
-                    offsetPos=view.size.width/(widthConstant/140);
-                }
-                else if(gameMap[O][q]==="^"){
-                    offsetPos=view.size.width/(widthConstant/325);
-                }
-                modified=true;
-                q+=1;
-            }
-            
-        }
-
-        function increment(){
-            i++;
-            actual++;
-            q++;
-            remainingLength--;
-            offset=0;
-            offsetPos=0;
-            modified=false;
-            // console.log(q);
-            // console.log(gameMap[O][q])
-            // console.log ("Offset not ON");
-        }
-
-        function reset(){
-            i=0;
-            y=defaultY;
-        }
-
-    </script>
 </head>
+
 <body>
-    <canvas id="myCanvas" resize></canvas>
+    <!-- Menu System -->
+    <div id="menuContainer">
+        <!-- Main Menu -->
+        <div id="mainMenu" class="menu-page">
+            <h1 class="menu-title">RhythmTyper</h1>
+            <button class="menu-button" onclick="showTrackSelect()">🎵 Rhythm Game</button>
+            <button class="menu-button sandbox-button" onclick="startSandbox()">🎨 Sandbox Mode</button>
+            <button class="menu-button" onclick="showInstructions()">📖 Instructions</button>
+        </div>
+
+        <!-- Track Selection -->
+        <div id="trackSelect" class="menu-page hidden">
+            <h2 class="menu-title" style="font-size: 3rem;">Select Your Track</h2>
+            <button class="menu-button track-button" onclick="startRhythmGame(0)">
+                🔥 BooM!
+                <div class="track-description">Fast-paced, high energy</div>
+            </button>
+            <button class="menu-button track-button track-2" onclick="startRhythmGame(1)">
+                🌊 DesI
+                <div class="track-description">Smooth, flowing rhythm</div>
+            </button>
+            <button class="menu-button track-button track-3" onclick="startRhythmGame(2)">
+                ⚡ Hyype
+                <div class="track-description">Complex, challenging patterns</div>
+            </button>
+            <button class="menu-button back-button" onclick="showMainMenu()">← Back</button>
+        </div>
+
+        <!-- Instructions -->
+        <div id="instructions" class="menu-page hidden">
+            <h2 class="menu-title" style="font-size: 3rem;">How to Play</h2>
+            <div style="max-width: 600px; text-align: center; line-height: 1.6;">
+                <p><strong>Rhythm Game:</strong></p>
+                <p>• Watch circles move toward each other</p>
+                <p>• Press the shown key exactly when they collide</p>
+                <p>• Follow visual indicators: <span style="color: gold;">+ = faster</span>, <span
+                        style="color: lightblue;">~ = change</span></p>
+                <p>• Use the on-screen keyboard for guidance</p>
+                <br>
+                <p><strong>Sandbox Mode:</strong></p>
+                <p>• Free practice with endless circles</p>
+                <p>• Press any key when circles collide</p>
+                <p>• Perfect for learning timing and sounds</p>
+            </div>
+            <button class="menu-button back-button" onclick="showMainMenu()">← Back</button>
+        </div>
+    </div>
+
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Game UI Overlay -->
+    <div id="ui-overlay">
+        <button id="exit-button" onclick="exitToMenu()">← Menu</button>
+        <div id="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        <div id="score-display">Score: <span id="score-value">0</span>/<span id="total-score">0</span></div>
+        <div id="key-preview"></div>
+        <div id="keyboard-hint">
+            <div class="keyboard-row">
+                <div class="key-button" data-key="q">Q</div>
+                <div class="key-button" data-key="w">W</div>
+                <div class="key-button" data-key="e">E</div>
+                <div class="key-button" data-key="r">R</div>
+                <div class="key-button" data-key="t">T</div>
+                <div class="key-button" data-key="y">Y</div>
+                <div class="key-button" data-key="u">U</div>
+                <div class="key-button" data-key="i">I</div>
+                <div class="key-button" data-key="o">O</div>
+                <div class="key-button" data-key="p">P</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key-button" data-key="a">A</div>
+                <div class="key-button" data-key="s">S</div>
+                <div class="key-button" data-key="d">D</div>
+                <div class="key-button" data-key="f">F</div>
+                <div class="key-button" data-key="g">G</div>
+                <div class="key-button" data-key="h">H</div>
+                <div class="key-button" data-key="j">J</div>
+                <div class="key-button" data-key="k">K</div>
+                <div class="key-button" data-key="l">L</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key-button" data-key="z">Z</div>
+                <div class="key-button" data-key="x">X</div>
+                <div class="key-button" data-key="c">C</div>
+                <div class="key-button" data-key="v">V</div>
+                <div class="key-button" data-key="b">B</div>
+                <div class="key-button" data-key="n">N</div>
+                <div class="key-button" data-key="m">M</div>
+            </div>
+        </div>
+        <div class="sandbox-info hidden" id="sandboxInfo">
+            <div>🎨 Sandbox Mode</div>
+            <div class="sandbox-subtitle">Press any key when circles collide • Endless practice</div>
+        </div>
+    </div>
+
+    <script>
+        // Menu System
+        let currentGame = null;
+
+        function showMainMenu() {
+            document.getElementById('mainMenu').classList.remove('hidden');
+            document.getElementById('trackSelect').classList.add('hidden');
+            document.getElementById('instructions').classList.add('hidden');
+        }
+
+        function showTrackSelect() {
+            document.getElementById('mainMenu').classList.add('hidden');
+            document.getElementById('trackSelect').classList.remove('hidden');
+            document.getElementById('instructions').classList.add('hidden');
+        }
+
+        function showInstructions() {
+            document.getElementById('mainMenu').classList.add('hidden');
+            document.getElementById('trackSelect').classList.add('hidden');
+            document.getElementById('instructions').classList.remove('hidden');
+        }
+
+        function startRhythmGame(trackIndex) {
+            document.getElementById('menuContainer').style.display = 'none';
+            document.getElementById('gameCanvas').style.display = 'block';
+            document.getElementById('ui-overlay').style.display = 'block';
+            document.getElementById('sandboxInfo').classList.add('hidden');
+
+            currentGame = new EasyRhythmTyper(trackIndex);
+        }
+
+        function startSandbox() {
+            document.getElementById('menuContainer').style.display = 'none';
+            document.getElementById('gameCanvas').style.display = 'block';
+            document.getElementById('ui-overlay').style.display = 'block';
+            document.getElementById('keyboard-hint').style.display = 'none';
+            document.getElementById('key-preview').style.display = 'none';
+            document.getElementById('progress-bar').style.display = 'none';
+            document.getElementById('score-display').style.display = 'none';
+            document.getElementById('sandboxInfo').classList.remove('hidden');
+
+            // Move sandbox indicator to top after 4 seconds
+            setTimeout(() => {
+                document.getElementById('sandboxInfo').classList.add('moved-top');
+            }, 4000);
+
+            currentGame = new SandboxMode();
+        }
+
+        function exitToMenu() {
+            if (currentGame) {
+                currentGame.destroy();
+                currentGame = null;
+            }
+
+            document.getElementById('menuContainer').style.display = 'flex';
+            document.getElementById('gameCanvas').style.display = 'none';
+            document.getElementById('ui-overlay').style.display = 'none';
+            document.getElementById('keyboard-hint').style.display = 'block';
+            document.getElementById('key-preview').style.display = 'flex';
+            document.getElementById('progress-bar').style.display = 'block';
+            document.getElementById('score-display').style.display = 'block';
+
+            // Reset sandbox indicator position
+            document.getElementById('sandboxInfo').classList.remove('moved-top');
+            document.getElementById('sandboxInfo').classList.add('hidden');
+
+            showMainMenu();
+        }
+
+        // Enhanced Rhythm Typer with Visual Indicators
+        class EasyRhythmTyper {
+            constructor(trackIndex = 0) {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.setupCanvas();
+
+                // EXACT original variables - NO CHANGES
+                this.n = 3;
+                this.x = 150;
+                this.size = 100;
+                this.widthConstant = 1920;
+                this.score = 0;
+                this.miss = false;
+                this.won = false;
+                this.running = false;
+                this.collided = false;
+                this.end = false;
+                this.modified = false;
+                this.i = 0;
+                this.q = 0;
+                this.actual = 0;
+                this.key = null;
+                this.offset = 0;
+                this.offsetPos = 0;
+
+                // Canvas objects to simulate Paper.js circles
+                this.circles = [];
+                this.circleWon = null;
+
+                // Performance cache
+                this.cachedMovementSpeed = this.width / 240;
+
+                // Visual indicators
+                this.keyColors = this.generateKeyColors();
+
+                // Track selection
+                this.O = trackIndex;
+
+                this.setupGame();
+                this.setupInput();
+                this.startGameLoop();
+            }
+
+            destroy() {
+                if (this.gameLoopId) {
+                    cancelAnimationFrame(this.gameLoopId);
+                }
+            }
+
+            generateKeyColors() {
+                // Generate consistent colors for each key
+                const keys = 'qwertyuiopasdfghjklzxcvbnm';
+                const colors = {};
+                keys.split('').forEach((key, index) => {
+                    const hue = (index * 360 / keys.length) % 360;
+                    colors[key] = {
+                        hue: hue,
+                        rgb: this.hslToRgb(hue / 360, 0.7, 0.5)
+                    };
+                });
+                return colors;
+            }
+
+            hslToRgb(h, s, l) {
+                let r, g, b;
+                if (s === 0) {
+                    r = g = b = l;
+                } else {
+                    const hue2rgb = (p, q, t) => {
+                        if (t < 0) t += 1;
+                        if (t > 1) t -= 1;
+                        if (t < 1 / 6) return p + (q - p) * 6 * t;
+                        if (t < 1 / 2) return q;
+                        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+                        return p;
+                    };
+                    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                    const p = 2 * l - q;
+                    r = hue2rgb(p, q, h + 1 / 3);
+                    g = hue2rgb(p, q, h);
+                    b = hue2rgb(p, q, h - 1 / 3);
+                }
+                return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+            }
+
+            setupCanvas() {
+                this.width = window.innerWidth;
+                this.height = window.innerHeight;
+                this.canvas.width = this.width;
+                this.canvas.height = this.height;
+
+                this.defaultY = this.height / 2 - 200;
+                this.y = this.defaultY;
+
+                // Text properties
+                this.textX = this.width / 2;
+                this.textY = this.height / 2;
+                this.destination = { x: this.textX, y: this.y * (this.i + 1) };
+
+                window.addEventListener('resize', () => {
+                    this.width = window.innerWidth;
+                    this.height = window.innerHeight;
+                    this.canvas.width = this.width;
+                    this.canvas.height = this.height;
+                    this.cachedMovementSpeed = this.width / 240;
+                });
+            }
+
+            setupGame() {
+                // Use passed track index instead of prompt
+                this.modifiers = /[\s\+\-!@#$%^]/;
+                this.gameMap = [
+                    "t+o+t^t^o%t^t$o$t^t^o%t^t$o",                    // 0: BooM!
+                    "v$s^v%s^v%s^v%s^v$s^v%s+h+f",                   // 1: DesI
+                    "p+p+p+p$p$p$p$p$p$p%p^p^o%p^p%o%p^p^o%p^p%o", // 2: Hyype
+                    "q+q+s^q+q+s^q+q+s^q+q+s",                      // 3: We Will Rock You
+                    "e^e^e+g^e^e+g^e^e+g^e^e+g",                    // 4: Seven Nation Army
+                    "d+s%d+s%d+s%d+s%d+s%d+s%d+s%d+s",              // 5: Billie Jean
+                    "u^d^u^d+u^d^u^d+u^d^u^d+u^d^u^d",              // 6: Under Pressure
+                    "g+d%g+d%g+f%g+d%g+d%g+f%g+d%g+d%g+f",          // 7: Smoke on the Water
+                    "a+s+d+a+s+d+a+s+d+a+s+d+f+g+h+f+g+h",          // 8: Sandstorm
+                    ""
+                ];
+                this.game = this.gameMap[this.O].replace(/[\s\+\-!@#$%^]/g, "");
+                this.remainingLength = this.game.length;
+
+                // Initialize UI
+                document.getElementById('total-score').textContent = this.game.length;
+
+                // Show guide
+                this.guider();
+
+                console.log("Track selected:", ["BooM!", "DesI", "Hyype"][this.O]);
+                console.log("Game sequence:", this.game);
+            }
+
+            guider() {
+                // Show guide without alert - display in UI instead
+                this.guide = this.gameMap[this.O].replace(/[$+]/g, "  ");
+                this.guide = this.guide.replace(/[%]/g, " ");
+                this.guide = this.guide.replace(/[\^]/g, "");
+                console.log("Guide pattern:", this.guide);
+            }
+
+            setupInput() {
+                document.addEventListener('keydown', (event) => {
+                    this.onKeyDown(event);
+                });
+            }
+
+            startGameLoop() {
+                const gameLoop = () => {
+                    this.onFrame();
+                    this.render();
+                    this.updateVisualIndicators();
+                    this.gameLoopId = requestAnimationFrame(gameLoop);
+                };
+                this.gameLoopId = requestAnimationFrame(gameLoop);
+            }
+
+            updateVisualIndicators() {
+                // Update key preview queue
+                this.updateKeyPreview();
+
+                // Update keyboard highlights
+                this.updateKeyboardHighlights();
+
+                // Update progress bar
+                this.updateProgressBar();
+
+                // Update score
+                document.getElementById('score-value').textContent = this.score;
+            }
+
+            updateKeyPreview() {
+                const preview = document.getElementById('key-preview');
+                const previewCount = 5; // Show next 5 keys
+                let html = '';
+
+                for (let i = 0; i < previewCount; i++) {
+                    const keyIndex = this.actual + i;
+                    if (keyIndex < this.game.length) {
+                        const key = this.game[keyIndex];
+                        let className = 'preview-key';
+
+                        if (i === 0) className += ' current';
+                        else if (i === 1) className += ' next';
+                        else className += ' future';
+
+                        // Add modifier hints
+                        let displayKey = key.toUpperCase();
+                        if (this.gameMap[this.O][this.q + i + 1] === "%") {
+                            displayKey += '+';
+                        } else if (this.gameMap[this.O][this.q + i + 1] === "^") {
+                            displayKey += '++';
+                        }
+
+                        const color = this.keyColors[key];
+                        const bgColor = color ? `rgba(${color.rgb[0]}, ${color.rgb[1]}, ${color.rgb[2]}, 0.3)` : '';
+
+                        html += `<div class="${className}" style="background-color: ${bgColor}">${displayKey}</div>`;
+                    }
+                }
+
+                preview.innerHTML = html;
+            }
+
+            updateKeyboardHighlights() {
+                // Reset all key buttons
+                document.querySelectorAll('.key-button').forEach(btn => {
+                    btn.className = 'key-button';
+                });
+
+                // Highlight upcoming keys
+                for (let i = 0; i < 5; i++) {
+                    const keyIndex = this.actual + i;
+                    if (keyIndex < this.game.length) {
+                        const key = this.game[keyIndex];
+                        const btn = document.querySelector(`[data-key="${key}"]`);
+                        if (btn) {
+                            if (i === 0) btn.classList.add('current');
+                            else if (i === 1) btn.classList.add('next');
+                            else btn.classList.add('upcoming');
+                        }
+                    }
+                }
+            }
+
+            updateProgressBar() {
+                const progress = ((this.game.length - this.remainingLength) / this.game.length) * 100;
+                document.querySelector('.progress-fill').style.width = `${progress}%`;
+            }
+
+            // Rest of the game logic remains the same...
+            onFrame() {
+                if (!this.end) {
+                    if (this.won) {
+                        if (this.circleWon) {
+                            this.circleWon.scale *= 1.1;
+                            var boundsY = this.circleWon.y - (this.circleWon.radius * this.circleWon.scale);
+                            if (boundsY < -500) {
+                                this.circleWon = null;
+                                this.won = false;
+                                this.running = false;
+                                this.score++;
+                            }
+                        }
+                    }
+
+                    if (!this.running && this.i < 3 && this.remainingLength > 0) {
+                        const currentKey = this.game[this.actual];
+                        const keyColor = this.keyColors[currentKey] || { rgb: [255, 255, 255] };
+
+                        this.circles = [
+                            {
+                                x: this.x,
+                                y: this.y * (this.i + 1),
+                                radius: this.size,
+                                fillColor: {
+                                    r: keyColor.rgb[0] / 255,
+                                    g: keyColor.rgb[1] / 255,
+                                    b: keyColor.rgb[2] / 255
+                                }
+                            },
+                            {
+                                x: this.width - this.x,
+                                y: this.y * (this.i + 1),
+                                radius: this.size,
+                                fillColor: {
+                                    r: keyColor.rgb[0] / 255 * 0.8,
+                                    g: keyColor.rgb[1] / 255 * 0.8,
+                                    b: keyColor.rgb[2] / 255 * 0.8
+                                },
+                                blendMode: "add"
+                            }
+                        ];
+
+                        this.key = this.game[this.actual];
+                        this.running = true;
+                        this.miss = false;
+                    }
+
+                    if (this.running && !this.won && this.circles.length >= 2) {
+                        this.checkForOffset();
+
+                        if (this.offsetPos != 0) {
+                            var offPos1 = (this.width / 5) + this.offsetPos;
+                            var offPos2 = (this.width / 5) + this.offsetPos;
+                            this.circles[0].x += offPos1;
+                            this.circles[1].x -= offPos2;
+                            this.offsetPos = 0;
+                        }
+
+                        this.circles[0].x += this.cachedMovementSpeed;
+                        this.circles[1].x -= this.cachedMovementSpeed;
+                        this.circles[0].x += this.offset;
+                        this.circles[1].x -= this.offset;
+
+                        var intersections = this.getIntersections(this.circles[0], this.circles[1]);
+
+                        if (intersections.length > 0 && !this.miss && this.running) {
+                            this.collided = true;
+                        }
+                        if (intersections.length == 0 && this.collided && this.running) {
+                            this.circles = [];
+                            this.miss = true;
+                            this.collided = false;
+                            this.running = false;
+                            this.increment();
+                        }
+                    }
+
+                    if (this.key !== undefined) {
+                        this.destination.y = this.y * (this.i + 1);
+                        var vectorX = this.destination.x - this.textX;
+                        var vectorY = this.destination.y - this.textY;
+                        this.textX += vectorX / 10;
+                        this.textY += vectorY / 10;
+                    }
+
+                    if (this.i > 2 && this.running == false) {
+                        if (Math.floor(this.remainingLength > 0)) {
+                            this.reset();
+                        }
+                    }
+                }
+
+                if (this.remainingLength == 0 && this.running == false && this.end != true) {
+                    console.log("Ending game");
+                    this.end = true;
+                }
+
+                if (this.end) {
+                    var vectorX = this.destination.x - this.textX;
+                    var vectorY = this.destination.y - this.textY;
+                    this.textX += vectorX / 30;
+                    this.textY += vectorY / 30;
+
+                    if (Math.sqrt(vectorX * vectorX + vectorY * vectorY) < 2) {
+                        this.destination.x = Math.random() * this.width;
+                        this.destination.y = Math.random() * this.height;
+                    }
+                }
+            }
+
+            getIntersections(circle1, circle2) {
+                const dx = circle1.x - circle2.x;
+                const dy = circle1.y - circle2.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const minDistance = circle1.radius + circle2.radius;
+
+                if (distance <= minDistance) {
+                    return [{
+                        point: {
+                            x: (circle1.x + circle2.x) / 2,
+                            y: (circle1.y + circle2.y) / 2
+                        }
+                    }];
+                }
+                return [];
+            }
+
+            onKeyDown(event) {
+                if (this.running && this.circles.length >= 2) {
+                    var intersections = this.getIntersections(this.circles[0], this.circles[1]);
+
+                    if (intersections.length > 0) {
+                        if (data[event.key] && event.key == this.key) {
+                            data[event.key].sound.play();
+
+                            this.circleWon = {
+                                x: intersections[0].point.x,
+                                y: this.y * this.i,
+                                radius: this.size,
+                                scale: 1.0,
+                                fillColor: {
+                                    r: Math.min(1, this.circles[0].fillColor.r + this.circles[1].fillColor.r),
+                                    g: Math.min(1, this.circles[0].fillColor.g + this.circles[1].fillColor.g),
+                                    b: Math.min(1, this.circles[0].fillColor.b + this.circles[1].fillColor.b)
+                                }
+                            };
+
+                            this.circles = [];
+                            this.won = true;
+                        }
+                    }
+                    else if (Math.abs(this.circles[1].x - this.circles[0].x) < 1000) {
+                        this.circles = [];
+                        console.log("Miss");
+                        this.miss = true;
+                        this.running = false;
+                        this.won = false;
+                        this.increment();
+                    }
+                }
+            }
+
+            checkForOffset() {
+                if (this.modifiers.test(this.gameMap[this.O][this.q]) && this.modified === false) {
+                    console.log("offset ON");
+                    if (this.gameMap[this.O][this.q] === "+") {
+                        this.offset = this.width / (this.widthConstant / 5);
+                    }
+                    else if (this.gameMap[this.O][this.q] === "!") {
+                        this.offset = this.width / (this.widthConstant / 10);
+                    }
+                    else if (this.gameMap[this.O][this.q] === "#") {
+                        console.log("This did run");
+                        this.offset = this.width / (this.widthConstant / 15);
+                    }
+                    else if (this.gameMap[this.O][this.q] === "$") {
+                        this.offsetPos = this.width / (this.widthConstant / 5);
+                    }
+                    else if (this.gameMap[this.O][this.q] === "%") {
+                        this.offsetPos = this.width / (this.widthConstant / 140);
+                    }
+                    else if (this.gameMap[this.O][this.q] === "^") {
+                        this.offsetPos = this.width / (this.widthConstant / 325);
+                    }
+                    this.modified = true;
+                    this.q += 1;
+                }
+            }
+
+            increment() {
+                this.i++;
+                this.actual++;
+                this.q++;
+                this.remainingLength--;
+                this.offset = 0;
+                this.offsetPos = 0;
+                this.modified = false;
+            }
+
+            reset() {
+                this.i = 0;
+                this.y = this.defaultY;
+            }
+
+            render() {
+                this.ctx.fillStyle = 'black';
+                this.ctx.fillRect(0, 0, this.width, this.height);
+
+                this.circles.forEach((circle, index) => {
+                    this.ctx.save();
+
+                    if (circle.blendMode === "add") {
+                        this.ctx.globalCompositeOperation = 'lighter';
+                    }
+
+                    this.ctx.fillStyle = `rgb(${Math.floor(circle.fillColor.r * 255)}, ${Math.floor(circle.fillColor.g * 255)}, ${Math.floor(circle.fillColor.b * 255)})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    this.ctx.restore();
+                });
+
+                if (this.circleWon) {
+                    this.ctx.fillStyle = `rgb(${Math.floor(this.circleWon.fillColor.r * 255)}, ${Math.floor(this.circleWon.fillColor.g * 255)}, ${Math.floor(this.circleWon.fillColor.b * 255)})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.circleWon.x, this.circleWon.y, this.circleWon.radius * this.circleWon.scale, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+
+                this.renderText();
+            }
+
+            renderText() {
+                this.ctx.fillStyle = 'white';
+                this.ctx.font = '30px Arial';
+                this.ctx.textAlign = 'center';
+
+                let textContent = "";
+
+                if (this.end) {
+                    textContent = "The End";
+                    if (this.score == this.game.length) {
+                        textContent += "\nPERFECT";
+                        this.ctx.fillStyle = 'orange';
+                    } else {
+                        this.ctx.fillStyle = 'white';
+                        textContent += `\nScore ${this.score}/${this.game.length}`;
+                    }
+                } else if (this.key !== undefined) {
+                    textContent = this.circles.length != 0 ? this.key.toUpperCase() : "";
+
+                    if (this.gameMap[this.O][this.q + 1] === "%") {
+                        textContent += " +";
+                    }
+                    else if (this.gameMap[this.O][this.q + 1] === "^") {
+                        textContent += " ++";
+                    }
+                    if (this.game[this.actual + 1] != this.game[this.actual]) {
+                        textContent += " ~";
+                    }
+                }
+
+                const lines = textContent.split('\n');
+                lines.forEach((line, index) => {
+                    this.ctx.fillText(line, this.textX, this.textY + (index * 40));
+                });
+            }
+        }
+
+        // Sandbox Mode - Based on RhythmOg.html
+        class SandboxMode {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.setupCanvas();
+
+                this.x = 150;
+                this.won = false;
+                this.circles = [];
+                this.circleWon = null;
+                this.keyColors = this.generateKeyColors();
+
+                this.setupInput();
+                this.generateCircles();
+                this.startGameLoop();
+            }
+
+            destroy() {
+                if (this.gameLoopId) {
+                    cancelAnimationFrame(this.gameLoopId);
+                }
+            }
+
+            generateKeyColors() {
+                const keys = 'qwertyuiopasdfghjklzxcvbnm';
+                const colors = {};
+                keys.split('').forEach((key, index) => {
+                    const hue = (index * 360 / keys.length) % 360;
+                    colors[key] = {
+                        hue: hue,
+                        rgb: this.hslToRgb(hue / 360, 0.7, 0.5)
+                    };
+                });
+                return colors;
+            }
+
+            hslToRgb(h, s, l) {
+                let r, g, b;
+                if (s === 0) {
+                    r = g = b = l;
+                } else {
+                    const hue2rgb = (p, q, t) => {
+                        if (t < 0) t += 1;
+                        if (t > 1) t -= 1;
+                        if (t < 1 / 6) return p + (q - p) * 6 * t;
+                        if (t < 1 / 2) return q;
+                        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+                        return p;
+                    };
+                    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                    const p = 2 * l - q;
+                    r = hue2rgb(p, q, h + 1 / 3);
+                    g = hue2rgb(p, q, h);
+                    b = hue2rgb(p, q, h - 1 / 3);
+                }
+                return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+            }
+
+            setupCanvas() {
+                this.width = window.innerWidth;
+                this.height = window.innerHeight;
+                this.canvas.width = this.width;
+                this.canvas.height = this.height;
+
+                window.addEventListener('resize', () => {
+                    this.width = window.innerWidth;
+                    this.height = window.innerHeight;
+                    this.canvas.width = this.width;
+                    this.canvas.height = this.height;
+                });
+            }
+
+            generateCircles() {
+                this.circles = [
+                    {
+                        x: this.x,
+                        y: this.height / 2,
+                        radius: 100,
+                        fillColor: {
+                            r: Math.random(),
+                            g: Math.random(),
+                            b: Math.random()
+                        }
+                    },
+                    {
+                        x: this.width - this.x,
+                        y: this.height / 2,
+                        radius: 100,
+                        fillColor: {
+                            r: Math.random(),
+                            g: Math.random(),
+                            b: Math.random()
+                        }
+                    }
+                ];
+            }
+
+            setupInput() {
+                document.addEventListener('keydown', (event) => {
+                    this.onKeyDown(event);
+                });
+            }
+
+            startGameLoop() {
+                const gameLoop = () => {
+                    this.onFrame();
+                    this.render();
+                    this.gameLoopId = requestAnimationFrame(gameLoop);
+                };
+                this.gameLoopId = requestAnimationFrame(gameLoop);
+            }
+
+            onFrame() {
+                // Move circles toward each other
+                this.circles[0].x += 8;
+                this.circles[1].x -= 8;
+
+                // Reset when circle goes off screen or when won
+                if (this.circles[1].x < 0 || this.won) {
+                    this.circles[0].x = this.x;
+                    this.circles[1].x = this.width - this.x;
+                }
+
+                // Handle winning circle animation
+                if (this.won && this.circleWon) {
+                    this.circleWon.scale *= 1.1;
+                    if (this.circleWon.y - (this.circleWon.radius * this.circleWon.scale) < -500) {
+                        this.circleWon = null;
+                        this.won = false;
+                        this.generateCircles(); // Generate new colors
+                    }
+                }
+            }
+
+            getIntersections(circle1, circle2) {
+                const dx = circle1.x - circle2.x;
+                const dy = circle1.y - circle2.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const minDistance = circle1.radius + circle2.radius;
+
+                if (distance <= minDistance) {
+                    return [{
+                        point: {
+                            x: (circle1.x + circle2.x) / 2,
+                            y: (circle1.y + circle2.y) / 2
+                        }
+                    }];
+                }
+                return [];
+            }
+
+            onKeyDown(event) {
+                const intersections = this.getIntersections(this.circles[0], this.circles[1]);
+
+                if (intersections.length > 0 && data[event.key]) {
+                    data[event.key].sound.play();
+
+                    // Create winning circle
+                    this.circleWon = {
+                        x: intersections[0].point.x,
+                        y: this.height / 2,
+                        radius: 100,
+                        scale: 1.0,
+                        fillColor: {
+                            r: Math.min(1, this.circles[0].fillColor.r + this.circles[1].fillColor.r),
+                            g: Math.min(1, this.circles[0].fillColor.g + this.circles[1].fillColor.g),
+                            b: Math.min(1, this.circles[0].fillColor.b + this.circles[1].fillColor.b)
+                        }
+                    };
+
+                    this.won = true;
+                }
+            }
+
+            render() {
+                this.ctx.fillStyle = 'black';
+                this.ctx.fillRect(0, 0, this.width, this.height);
+
+                // Render game circles
+                this.circles.forEach((circle) => {
+                    this.ctx.fillStyle = `rgb(${Math.floor(circle.fillColor.r * 255)}, ${Math.floor(circle.fillColor.g * 255)}, ${Math.floor(circle.fillColor.b * 255)})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+
+                // Render winning circle
+                if (this.circleWon) {
+                    this.ctx.fillStyle = `rgb(${Math.floor(this.circleWon.fillColor.r * 255)}, ${Math.floor(this.circleWon.fillColor.g * 255)}, ${Math.floor(this.circleWon.fillColor.b * 255)})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.circleWon.x, this.circleWon.y, this.circleWon.radius * this.circleWon.scale, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
+        }
+    </script>
 </body>
+
 </html>
